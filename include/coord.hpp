@@ -2,7 +2,7 @@
 #ifndef COORD_HPP
 #define COORD_HPP
 
-namespace mapdb {
+namespace rbox {
 
 template <typename T,int dim>
 struct coord {
@@ -163,5 +163,5 @@ typedef coord<int, 2> coord2i;
 typedef coord<double, 3> coord3d;
 typedef coord<int, 3> coord3i;
 
-} // mapdb
+} // rbox
 #endif // COORD_HPP

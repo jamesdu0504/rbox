@@ -7,7 +7,7 @@
 #include "rtree.hpp"
 
 
-using namespace mapdb;
+using namespace rbox;
 
 //
 // MemoryTest.cpp

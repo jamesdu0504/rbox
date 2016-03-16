@@ -14,7 +14,7 @@
 #endif
 #endif
 
-namespace mapdb {
+namespace rbox {
 
 template <typename DATATYPE>
 struct ClusterPointT
@@ -321,6 +321,6 @@ struct Cluster
 
 };
 
-} // mapdb
+} // rbox
 
 #endif // CLUSTER_H

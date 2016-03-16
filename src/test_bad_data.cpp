@@ -9,7 +9,7 @@
 #include "rtree.hpp"
 
 using namespace std;
-using namespace mapdb;
+using namespace rbox;
 
 typedef int ValueType;
 typedef long long CoordType;

@@ -19,7 +19,7 @@
 //
 // RTree.h
 //
-namespace mapdb {
+namespace rbox {
 
 #define RTREE_TEMPLATE template<class DATATYPE, class ELEMTYPE, int NUMDIMS, class ELEMTYPEREAL, int TMAXNODES, int TMINNODES>
 #define RTREE_QUAL RTree<DATATYPE, ELEMTYPE, NUMDIMS, ELEMTYPEREAL, TMAXNODES, TMINNODES>
@@ -1744,5 +1744,5 @@ typedef RTree<double, int, 2, double> RTree2d;
 typedef RTree<int, int, 3, float> RTree3i;
 typedef RTree<double, int, 3, double> RTree3d;
 
-} // mapdb
+} // rbox
 #endif //RTREE_H

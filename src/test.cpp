@@ -13,7 +13,7 @@
 #include <string_utils/string_utils.hpp>
 
 using namespace std;
-using namespace mapdb;
+using namespace rbox;
 using namespace string_utils;
 
 typedef int ValueType;
