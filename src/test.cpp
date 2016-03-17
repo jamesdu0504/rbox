@@ -10,11 +10,11 @@
 #include <rtree.hpp>
 #include <cluster.hpp>
 
-#include <string_utils/string_utils.hpp>
+//#include <string_utils/string_utils.hpp>
+//using namespace string_utils;
 
 using namespace std;
 using namespace rbox;
-using namespace string_utils;
 
 typedef int ValueType;
 
