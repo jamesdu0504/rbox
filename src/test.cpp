@@ -149,8 +149,6 @@ int test_rtree()
         cout << *it << endl;
     }
 
-    tree.Save("test.rtree");
-
     return 0;
 
     // Output:
@@ -173,8 +171,7 @@ struct Point
 {
     double lon;
     double lat;
-    string name;
-    Point(double lon = .0, double lat = .0, string name = ""):lon(lon),lat(lat),name(name){}
+    Point(double lon = .0, double lat = .0):lon(lon),lat(lat){}
 };
 
 int test_cluster()
@@ -184,87 +181,75 @@ int test_cluster()
     MyCluster cluster(0, 5);
     vector<shared_ptr<Point>> points;
     vector<MyCluster::ClusterPointPtr> cpoints;
-    int scale = 2;
+    int scale = 4;
 
     for(int i = -180*scale; i < 180*scale; ++i)
     {
         for(int j = -85*scale; j < 85*scale; ++j)
         {
-            auto point = make_shared<Point>(i*1./scale, j*1./scale, "");
-            //Point point(i*1./scale, j*1./scale);
-            //point->name = to_string<string>(point->lon) + "_" + to_string<string>(point->lat);
-            //point.name = to_string<string>(point.lon) + "_" + to_string<string>(point.lat);
+            auto point = make_shared<Point>(i*1./scale, j*1./scale);
             points.push_back(point);
         }
     }
 
     cout << points.size() << endl;
 
-    //ofstream out0("src0.csv");
-    //ofstream out1("src1.csv");
     for(auto it = points.begin(); it != points.end(); ++it)
     {
         auto point = *it;
         auto cpoint = cluster.create_cluster_point(point->lon, point->lat, true);
         cpoint->data = point;
         cpoints.push_back(cpoint);
-        //out0 << point->lon << "," << point->lat << endl;
-        //coord2d co = cluster.get_cluster_point_coord(cpoint, true);
-        //out1 << co.x << "," << co.y << endl;
     }
-    //out0.close();
-    //out1.close();
-
     points.clear();
-
     cluster.load(cpoints);
     cpoints.clear();
 
     for(int i = cluster.min_level; i <= cluster.max_level+1; ++i)
     {
         cout << "level " << i << ": " << cluster.get_clusters_num(i) << endl;
-
-        ofstream tree_point_out("vector_center_" + to_string<string>(i) + ".csv");
-        ofstream tree_point_out2("vector_centroid_" + to_string<string>(i) + ".csv");
-        auto tree = cluster._rtrees[i];
-        MyCluster::ClusterRTree::Iterator it;
-        int count = 0;
-        for(tree->GetFirst(it); !tree->IsNull(it); tree->GetNext(it))
-        {
-            auto p = tree->GetAt(it);
-            coord2d co = cluster.get_cluster_center_coord(p);
-            coord2d co2 = cluster.get_cluster_centroid_coord(p);
-            tree_point_out << co.x << "," << co.y << "," << p->count << endl;
-            tree_point_out2 << co2.x << "," << co2.y << "," << p->count << endl;
-            count += p->count;
-        }
-        cout << "point count: " << count << endl;
-        tree_point_out.close();
-        tree_point_out2.close();
+        //ofstream tree_point_out("tree_center_" + to_string<string>(i) + ".csv");
+        //ofstream tree_point_out2("tree_centroid_" + to_string<string>(i) + ".csv");
+        //auto tree = cluster._rtrees[i];
+        //MyCluster::ClusterRTree::Iterator it;
+        //int count = 0;
+        //for(tree->GetFirst(it); !tree->IsNull(it); tree->GetNext(it))
+        //{
+        //    auto p = tree->GetAt(it);
+        //    coord2d co = cluster.get_cluster_center_coord(p);
+        //    coord2d co2 = cluster.get_cluster_centroid_coord(p);
+        //    tree_point_out << co.x << "," << co.y << "," << p->count << endl;
+        //    tree_point_out2 << co2.x << "," << co2.y << "," << p->count << endl;
+        //    count += p->count;
+        //}
+        //cout << "point count: " << count << endl;
+        //tree_point_out.close();
+        //tree_point_out2.close();
     }
-    return 0;
-    auto tree = cluster._rtrees[1];
-
-    cout << tree->Count() << endl;
 
     coord3i tile(0,0,0);
     vector<MyCluster::ClusterPointPtr> result;
-    //cluster.get_clusters(tile, result);
-    double min[2] = {0.5, 0.5};
-    double max[2] = {1., 1.};
-    tree->Search(min, max, result);
-
+    cluster.get_clusters(tile, result);
     cout << result.size() << endl;
-    for(auto it = result.begin(); it != result.end(); ++it)
-    {
-        auto cpoint = *it;
-        coord2d co = cluster.get_cluster_centroid_coord(cpoint, true);
-        cout << "centroid: " << co.x << "," << co.y << endl;
-        co = cluster.get_cluster_center_coord(cpoint, true);
-        cout << "center: " << co.x << "," << co.y << endl;
-        cout << "cluster num: " << cpoint->count << endl;
-    }
-
+    //for(auto it = result.begin(); it != result.end(); ++it)
+    //{
+    //    auto cpoint = *it;
+    //    coord2d co = cluster.get_cluster_centroid_coord(cpoint, true);
+    //    cout << "centroid: " << co.x << "," << co.y << endl;
+    //    co = cluster.get_cluster_center_coord(cpoint, true);
+    //    cout << "center: " << co.x << "," << co.y << endl;
+    //    cout << "num: " << cpoint->count << endl;
+    //}
+    result.clear();
+    auto tree = cluster._rtrees[1];
+    double coord[2] = {0., 0.};
+    tree->KNN(coord, 10, result);
+    cout << result.size() << endl;
+    //for(int i = 0; i < result.size(); i++)
+    //{
+    //    auto pt = result[i];
+    //    cout << pt->centroid.x << ", " << pt->centroid.y << endl;
+    //}
 
 
     return 0;

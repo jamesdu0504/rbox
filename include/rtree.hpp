@@ -566,8 +566,6 @@ RTREE_TEMPLATE
 RTREE_TEMPLATE
     bool RTREE_QUAL::KNN(const ELEMTYPE coord[NUMDIMS], const int k_value, std::vector<DATATYPE>& result, ELEMTYPEREAL dis_limit, t_resultCallback predicate, void* a_context)
 {
-
-    // std::priority_queue<KNNode, std::vector<KNNode>, knnode_greater_cmp> knnode_queue;
     std::priority_queue<KNNode, std::vector<KNNode>, std::greater<KNNode> > knnode_queue;
 
     Branch* branch = nullptr;
@@ -582,7 +580,9 @@ RTREE_TEMPLATE
             {
                 ELEMTYPEREAL distance = CalcPointRectDis(coord, &branch->m_rect);
                 if (dis_limit < 0 || distance < dis_limit)
+                {
                     knnode_queue.push(KNNode(branch, distance));
+                }
             }
         }
 

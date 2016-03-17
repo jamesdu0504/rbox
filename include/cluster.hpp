@@ -56,7 +56,10 @@ struct Cluster
         }
     }
 
-    ~Cluster(){}
+    ~Cluster()
+    {
+        _rtrees.clear();
+    }
 
     ClusterPointPtr create_cluster_point(double lon, double lat, bool bproj = false)
     {
