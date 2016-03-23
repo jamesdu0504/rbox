@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <functional>
 #include <fstream>
 
 #define ASSERT assert // RTree uses ASSERT( condition )
@@ -586,15 +587,19 @@ RTREE_TEMPLATE
             }
         }
 
-        while (knnode_queue.size() && knnode_queue.top().isLeaf()) 
+        while (knnode_queue.size()) 
         {
-            branch = knnode_queue.top().m_branch;
-            knnode_queue.pop();
-            if (!predicate || predicate(branch->m_data, a_context))
+            KNNode knode = knnode_queue.top();
+            if (knode.isLeaf())
             {
-                result.push_back(branch->m_data);
+                branch = knnode_queue.top().m_branch;
+                knnode_queue.pop();
+                if (!predicate || predicate(branch->m_data, a_context))
+                {
+                    result.push_back(branch->m_data);
+                }
+                if (result.size() == k_value) return true;
             }
-            if (result.size() == k_value) return true;
         }
 
         if (knnode_queue.size())
