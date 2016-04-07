@@ -1,7 +1,8 @@
+#include <algorithm/geohash.hpp>
+
+#include <iostream>
 #include <vector>
 #include <cassert>
-#include <geohash.hpp>
-#include <iostream>
 
 using namespace std;
 using namespace rbox;

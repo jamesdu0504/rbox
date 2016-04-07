@@ -1,6 +1,6 @@
 
 
-#include <random_point_in_polygon.hpp>
+#include <algorithm/random_point_in_polygon.hpp>
 
 #include <cassert>
 #include <iostream>

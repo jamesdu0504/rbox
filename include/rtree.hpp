@@ -1,5 +1,4 @@
-#ifndef RTREE_H
-#define RTREE_H
+#pragma once
 
 #include <cassert>
 #include <cmath>
@@ -1735,4 +1734,4 @@ typedef RTree<int, int, 3, float> RTree3i;
 typedef RTree<double, int, 3, double> RTree3d;
 
 } // rbox
-#endif //RTREE_H
+

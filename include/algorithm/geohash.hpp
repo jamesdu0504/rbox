@@ -1,13 +1,12 @@
 
-#ifndef GEOHASH_HPP
-#define GEOHASH_HPP
+#pragma once
+
+#include <coord.hpp>
 
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <algorithm>
-
-#include <coord.hpp>
 
 namespace rbox {
 
@@ -500,4 +499,3 @@ namespace geohash {
 
 }
 
-#endif // GEOHASH_HPP

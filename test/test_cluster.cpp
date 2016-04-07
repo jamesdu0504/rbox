@@ -1,17 +1,12 @@
-//
-// test.cpp
-//
+
+#include <rtree.hpp>
+#include <algorithm/cluster.hpp>
 
 #include <string>
 #include <iostream>
 #include <memory>
 #include <fstream>
 #include <cassert>
-
-#include <rtree.hpp>
-#include <cluster.hpp>
-
-//#include <string_utils/string_utils.hpp>
 
 using namespace std;
 using namespace rbox;

@@ -1,8 +1,8 @@
-#ifndef CLUSTER_H
-#define CLUSTER_H
+#pragma once
 
 #include <rtree.hpp>
 #include <coord.hpp>
+
 #include <vector>
 #include <memory>
 #include <cmath>
@@ -254,6 +254,6 @@ struct Cluster
 
 };
 
-} // rbox
+}
 
-#endif // CLUSTER_H
+

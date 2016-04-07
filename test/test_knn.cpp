@@ -9,7 +9,6 @@
 #include <cassert>
 
 #include <rtree.hpp>
-#include <cluster.hpp>
 
 //#include <string_utils/string_utils.hpp>
 //using namespace string_utils;

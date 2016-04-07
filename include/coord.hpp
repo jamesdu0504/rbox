@@ -1,20 +1,19 @@
 
-#ifndef COORD_HPP
-#define COORD_HPP
+#pragma once
+
+#ifndef WITH_MAPNIK
 
 namespace rbox {
 
-template <typename T,int dim>
+template <typename T, int dim>
 struct coord {
-    //using type = T;
-    typedef T type;
+    using type = T;
 };
 
 template <typename T>
 struct coord<T,2>
 {
-    //using type = T;
-    typedef T type;
+    using type = T;
     T x;
     T y;
 public:
@@ -32,12 +31,9 @@ public:
         : x(type(rhs.x)),
         y(type(rhs.y)) {}
 
-    //coord(coord<T,2> && rhs) noexcept
-    //    : x(std::move(rhs.x)),
-    //      y(std::move(rhs.y)) {}
-    coord(coord<T,2> && rhs)
+    coord(coord<T,2> && rhs) noexcept
         : x(std::move(rhs.x)),
-        y(std::move(rhs.y)) {}
+          y(std::move(rhs.y)) {}
 
     coord<T,2>& operator=(coord<T,2> rhs)
     {
@@ -57,6 +53,12 @@ public:
     bool operator==(coord<T2,2> const& rhs)
     {
         return x == rhs.x && y == rhs.y;
+    }
+
+    template <typename T2>
+    bool operator!=(coord<T2, 2> const& rhs)
+    {
+        return x != rhs.x || y != rhs.y;
     }
 
     coord<T,2>& operator+=(coord<T,2> const& rhs)
@@ -99,6 +101,48 @@ public:
         y/=t;
         return *this;
     }
+    coord<T, 2> operator+(coord<T, 2> rhs)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x += rhs.x;
+        tmp.y += rhs.y;
+        return tmp;
+    }
+    coord<T, 2> operator+(T t)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x += t;
+        tmp.y += t;
+        return tmp;
+    }
+    coord<T, 2> operator-(coord<T, 2> rhs)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x -= rhs.x;
+        tmp.y -= rhs.y;
+        return tmp;
+    }
+    coord<T, 2> operator-(T t)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x -= t;
+        tmp.y -= t;
+        return tmp;
+    }
+    coord<T, 2> operator*(T t)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x *= t;
+        tmp.y *= t;
+        return tmp;
+    }
+    coord<T, 2> operator/(T t)
+    {
+        coord<T, 2> tmp(*this);
+        tmp.x /= t;
+        tmp.y /= t;
+        return tmp;
+    }
 private:
     void swap(coord<T,2> & rhs)
     {
@@ -110,8 +154,7 @@ private:
 template <typename T>
 struct coord<T,3>
 {
-    //using type = T;
-    typedef T type;
+    using type = T;
     T x;
     T y;
     T z;
@@ -127,14 +170,10 @@ public:
         y(type(rhs.y)),
         z(type(rhs.z)) {}
 
-    //coord(coord<T,3> && rhs) noexcept
-    //    : x(std::move(rhs.x)),
-    //      y(std::move(rhs.y)),
-    //      z(std::move(rhs.z)) {}
-    coord(coord<T,3> && rhs)
+    coord(coord<T,3> && rhs) noexcept
         : x(std::move(rhs.x)),
-        y(std::move(rhs.y)),
-        z(std::move(rhs.z)) {}
+          y(std::move(rhs.y)),
+          z(std::move(rhs.z)) {}
 
     coord<T,3> operator=(coord<T,3> rhs)
     {
@@ -157,11 +196,25 @@ private:
         std::swap(this->z, rhs.z);
     }
 };
+}
+#else
+#include <mapnik/coord>
+namespace rbox {
+    template <typename T, int dim>
+    using coord = mapnik::coord<T, dim>;
 
-typedef coord<double, 2> coord2d;
-typedef coord<int, 2> coord2i;
-typedef coord<double, 3> coord3d;
-typedef coord<int, 3> coord3i;
+    template <typename T>
+    using coord2 = mapnik::coord2<T, 2>;
 
-} // rbox
-#endif // COORD_HPP
+    template <typename T>
+    using coord3 = mapnik::coord3<T, 3>;
+}
+#endif
+
+namespace rbox {
+using coord2d = coord<double, 2>;
+using coord2i = coord<int, 2>;
+using coord3d = coord<double, 3>;
+using coord3i = coord<int, 3>;
+}
+
