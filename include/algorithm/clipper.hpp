@@ -44,7 +44,7 @@
 //#define use_xyz
 
 //use_lines: Enables line clipping. Adds a very minor cost to performance.
-#define use_lines
+//#define use_lines
   
 //use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated  
@@ -58,6 +58,10 @@
 #include <ostream>
 #include <functional>
 #include <queue>
+#include <unordered_map>
+#if defined(CLIPPER_IMPL_INCLUDE)
+#include CLIPPER_IMPL_INCLUDE
+#endif
 
 namespace ClipperLib {
 
@@ -74,7 +78,7 @@ enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
   static cInt const loRange = 0x7FFF;
   static cInt const hiRange = 0x7FFF;
 #else
-  typedef signed long long cInt;
+  typedef std::int64_t cInt;
   static cInt const loRange = 0x3FFFFFFF;
   static cInt const hiRange = 0x3FFFFFFFFFFFFFFFLL;
   typedef signed long long long64;     //used by Int128 class
@@ -82,29 +86,57 @@ enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
 
 #endif
 
+#if defined(CLIPPER_INTPOINT_IMPL)
+
+typedef CLIPPER_INTPOINT_IMPL IntPoint;
+
+#else
+
 struct IntPoint {
-  cInt X;
-  cInt Y;
+  cInt x;
+  cInt y;
 #ifdef use_xyz
   cInt Z;
-  IntPoint(cInt x = 0, cInt y = 0, cInt z = 0): X(x), Y(y), Z(z) {};
+  IntPoint(cInt _x = 0, cInt _y = 0, cInt z = 0): x(_x), y(_y), Z(z) {};
 #else
-  IntPoint(cInt x = 0, cInt y = 0): X(x), Y(y) {};
+  IntPoint(cInt _x = 0, cInt _y = 0): x(_x), y(_y) {};
 #endif
 
   friend inline bool operator== (const IntPoint& a, const IntPoint& b)
   {
-    return a.X == b.X && a.Y == b.Y;
+    return a.x == b.x && a.y == b.y;
   }
   friend inline bool operator!= (const IntPoint& a, const IntPoint& b)
   {
-    return a.X != b.X  || a.Y != b.Y; 
+    return a.x != b.x  || a.y != b.y; 
   }
 };
+#endif
+
 //------------------------------------------------------------------------------
 
+#if defined(CLIPPER_PATH_IMPL)
+
+typedef CLIPPER_PATH_IMPL Path;
+
+#else
+
 typedef std::vector< IntPoint > Path;
+
+#endif
+
+
+#if defined(CLIPPER_PATHS_IMPL)
+
+typedef CLIPPER_PATHS_IMPL Paths;
+
+#else
+
 typedef std::vector< Path > Paths;
+
+#endif
+
+
 
 inline Path& operator <<(Path& poly, const IntPoint& p) {poly.push_back(p); return poly;}
 inline Paths& operator <<(Paths& polys, const Path& p) {polys.push_back(p); return polys;}
@@ -115,10 +147,10 @@ std::ostream& operator <<(std::ostream &s, const Paths &p);
 
 struct DoublePoint
 {
-  double X;
-  double Y;
-  DoublePoint(double x = 0, double y = 0) : X(x), Y(y) {}
-  DoublePoint(IntPoint ip) : X((double)ip.X), Y((double)ip.Y) {}
+  double x;
+  double y;
+  DoublePoint(double _x = 0, double _y = 0) : x(_x), y(_y) {}
+  DoublePoint(IntPoint ip) : x((double)ip.x), y((double)ip.y) {}
 };
 //------------------------------------------------------------------------------
 
@@ -204,6 +236,7 @@ struct LocalMinimum;
 struct OutPt;
 struct OutRec;
 struct Join;
+struct OutPtIntersect;
 
 typedef std::vector < OutRec* > PolyOutList;
 typedef std::vector < TEdge* > EdgeList;
@@ -346,6 +379,19 @@ private:
   bool JoinPoints(Join *j, OutRec* outRec1, OutRec* outRec2);
   void JoinCommonEdges();
   void DoSimplePolygons();
+  bool FindIntersectLoop(std::unordered_multimap<int, OutPtIntersect> & dupeRec,
+                         std::list<std::pair<int, OutPtIntersect> > & iList,
+                         OutRec * outRec_parent,
+                         int idx_origin,
+                         int idx_prev,
+                         std::set<int> & visited,
+                         OutPt * orig_pt, 
+                         OutPt * prev_pt);
+  bool FixIntersects(std::unordered_multimap<int, OutPtIntersect> & dupeRec,
+                     OutPt * op_j,
+                     OutPt * op_k,
+                     OutRec * outRec_j,
+                     OutRec * outRec_k);
   void FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec);
   void FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec);
   void FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec);
