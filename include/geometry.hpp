@@ -112,6 +112,17 @@ struct polygon
     {
         return 1 + interior_rings.size();
     }
+
+    inline rings_container flatten() const
+    {
+        rings_container rings;
+        rings.emplace_back(std::move(exterior_ring));
+        for (const auto& ring : interior_rings)
+        {
+            rings.emplace_back(std::move(ring));
+        }
+        return rings;
+    }
 };
 
 template <typename T>

@@ -65,13 +65,12 @@ template <> struct nth<1, rbox::point<int>> {
 
 namespace rbox {
 
-template <typename Vertex, typename IndexType = uint32_t>
+template <typename Vertex, typename Polygon = std::vector<std::vector<Vertex>>, typename IndexType = uint32_t>
 class triangulate
 {
 public:
     using Vertices = std::vector<Vertex>;
     using Indices = std::vector<IndexType>;
-    using Polygon = std::vector<Vertices>;
 
     triangulate(const Polygon &polygon_)
         : polygon(polygon_)
