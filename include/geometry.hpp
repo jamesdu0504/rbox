@@ -49,6 +49,9 @@ struct line_string : std::vector<point<T> >
     line_string& operator=(line_string const&) = default;
     inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
     inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
+
+    line_string(const std::initializer_list<point<T>> l):std::vector<point<T>>(l) {}
+
 };
 
 template <typename T>
@@ -65,6 +68,7 @@ struct linear_ring : line_string<T>
     linear_ring(line_string<T> const& other)
         : line_string<T>(other) {}
     linear_ring& operator=(linear_ring const&) = default;
+    linear_ring(const std::initializer_list<point<T>> l):line_string<T>(l){};
 
 };
 
@@ -79,6 +83,19 @@ struct polygon
     rings_container interior_rings;
 
     polygon() = default;
+
+    polygon(rings_container const& rings)
+    {
+        if(rings.size() > 0)
+        {
+            exterior_ring = std::move(rings[0]);
+            for (std::size_t i = 1; i < rings.size(); i++)
+            {
+                interior_rings.emplace_back(std::move(rings[i]));
+            }
+        }
+    }
+
     inline void set_exterior_ring(linear_ring<T> && ring)
     {
         exterior_ring = std::move(ring);

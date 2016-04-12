@@ -2,6 +2,7 @@
 
 #include <mapbox/util/earcut.hpp>
 #include <coord.hpp>
+#include <geometry.hpp>
 
 #include <memory>
 #include <vector>
@@ -34,22 +35,51 @@ template <> struct nth<1, rbox::coord2i> {
     };
 };
 
+template <> struct nth<0, rbox::point<double>> {
+    inline static double get(const rbox::point<double> &t) {
+        return t.x;
+    };
+};
+
+template <> struct nth<1, rbox::point<double>> {
+    inline static double get(const rbox::point<double> &t) {
+        return t.y;
+    };
+};
+
+template <> struct nth<0, rbox::point<int>> {
+    inline static double get(const rbox::point<double> &t) {
+        return t.x;
+    };
+};
+
+template <> struct nth<1, rbox::point<int>> {
+    inline static double get(const rbox::point<double> &t) {
+        return t.y;
+    };
+};
+
 }
 }
+
 
 namespace rbox {
 
 template <typename Vertex, typename IndexType = uint32_t>
-class Triangulate {
+class triangulate
+{
 public:
     using Vertices = std::vector<Vertex>;
-    using Polygon = std::vector<std::vector<Vertex>>;
+    using Indices = std::vector<IndexType>;
+    using Polygon = std::vector<Vertices>;
 
-    Triangulate(const Polygon &polygon_)
+    triangulate(const Polygon &polygon_)
         : polygon(polygon_)
     {
-        for (const auto& ring : polygon_) {
-            for (const auto& vertex : ring) {
+        for (const auto& ring : polygon_) 
+        {
+            for (const auto& vertex : ring)
+            {
                 vertices_.emplace_back(Vertex(vertex));
             }
         }
@@ -59,18 +89,25 @@ public:
         indices_ = mapbox::earcut<IndexType>(polygon);
     }
 
-    std::vector<IndexType> indices() const {
+    Indices indices() const
+    {
         return indices_;
     }
 
-    Vertices vertices() const {
+    Vertices vertices() const
+    {
         return vertices_;
+    }
+
+    std::size_t num_triangles() const
+    {
+        return indices_.size() / 3;
     }
 
 private:
     const Polygon &polygon;
     Vertices vertices_;
-    std::vector<IndexType> indices_;
+    Indices indices_;
 };
 
 }
