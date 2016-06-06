@@ -11,10 +11,12 @@
 
 namespace rbox {
 
-    static inline double random(const double xmin = 0., const double xmax = 1.)
+namespace detail {
+
+    inline double random(const double xmin = 0., const double xmax = 1.)
     {
         static bool first = true;
-        static uint64_t count = 0;
+        static size_t count = 0;
         if (first)
         {
             first = false;
@@ -24,7 +26,8 @@ namespace rbox {
         return xmin + (xmax - xmin) * rand() / RAND_MAX;
     }
 
-    static coord2d random_point_in_triangle(const coord2d& c1, const coord2d& c2, const coord2d& c3)
+    template <typename Vertex>
+    inline Vertex random_point_in_triangle(const Vertex& c1, const Vertex& c2, const Vertex& c3)
     {
         double x = random();
         double y = random();
@@ -33,79 +36,83 @@ namespace rbox {
             x = 1. - x;
             y = 1. - y;
         }
-        coord2d output;
+        Vertex output;
         output.x = (c2.x - c1.x) * x + (c3.x - c1.x) * y + c1.x;
         output.y = (c2.y - c1.y) * x + (c3.y - c1.y) * y + c1.y;
         return output;
     }
 
-    static double triangle_area(const coord2d& c1, const coord2d& c2, const coord2d& c3)
+    template <typename Vertex>
+    inline double triangle_area(const Vertex& c1, const Vertex& c2, const Vertex& c3)
     {
         return double(std::abs((c1.x - c3.x) * (c2.y - c1.y) - (c1.x - c2.x) * (c3.y - c1.y))) / 2;
     }
+    
+}
 
-    typedef void (*generate_point_callback)(const coord2d& c);
-    typedef std::vector<std::vector<coord2d>> polygon;
-     
-    static void random_point_in_polygon(polygon const& poly, uint64_t generate_nums, generate_point_callback handler_point)
+template <typename Vertex>
+using generate_point_callback = void(*)(const Vertex& c);
+
+template <typename Vertex, typename Polygon = std::vector<std::vector<Vertex>>>
+inline void random_point_in_polygon(Polygon const& poly, size_t generate_nums, generate_point_callback<Vertex> handler_point)
+{
+    auto triangluate = triangulate<Vertex>(poly);
+    triangluate.run();
+    const auto &vertices = triangluate.vertices();
+    const auto &indices = triangluate.indices();
+
+    std::vector<double> tri_areas;
+    double poly_area = 0.;
+    double area = 0.;
+    for (size_t i = 0; i < indices.size(); i += 3)
     {
-        auto triangluate = Triangulate<coord2d>(poly);
-        triangluate.run();
-        const auto &vertices = triangluate.vertices();
-        const auto &indices = triangluate.indices();
-        // calculate area
-        std::vector<double> tri_areas;
-        double poly_area = 0.;
-        double area = 0.;
-        for (size_t i = 0; i < indices.size(); i = i + 3)
+        area = detail::triangle_area(
+            vertices[indices[i]],
+            vertices[indices[i + 1]],
+            vertices[indices[i + 2]]);
+        tri_areas.push_back(area);
+        poly_area += area;
+    }
+
+    size_t ready_num = 0;
+    for (size_t i = 0; i < indices.size(); i += 3)
+    {
+        size_t temp = size_t(tri_areas[i/3] / poly_area * generate_nums + 0.5);
+        if (ready_num + temp > generate_nums)
         {
-            area = triangle_area(
+            temp = generate_nums - ready_num;
+        }
+        for (size_t j = 0; j < temp; j++)
+        {
+            auto& coord = detail::random_point_in_triangle(
                 vertices[indices[i]],
                 vertices[indices[i + 1]],
                 vertices[indices[i + 2]]);
-            tri_areas.push_back(area);
-            poly_area += area;
-        }
-
-        //std::stable_sort(tri_areas.begin(), tri_areas.end());
-
-        uint64_t ready_num = 0;
-        for (uint64_t i = 0; i < indices.size(); i = i + 3)
-        {
-            uint64_t temp = uint64_t(tri_areas[i/3] / poly_area * generate_nums + 0.5);
-            if (ready_num + temp > generate_nums)
+            if (handler_point)
             {
-                temp = generate_nums - ready_num;
+                handler_point(coord);
             }
-            for (uint64_t j = 0; j < temp; j++)
-            {
-                auto& coord = random_point_in_triangle(
-                    vertices[indices[i]],
-                    vertices[indices[i + 1]],
-                    vertices[indices[i + 2]]);
-                if (handler_point)
-                {
-                    handler_point(coord);
-                }
-            }
-            ready_num += temp;
         }
+        ready_num += temp;
+    }
 
-        if (ready_num < generate_nums)
+    if (ready_num < generate_nums)
+    {
+        size_t temp = generate_nums - ready_num;
+        int max_pos = std::distance(tri_areas.begin(), std::max_element(tri_areas.begin(), tri_areas.end()));
+        for (size_t j = 0; j < temp; j++)
         {
-            uint64_t temp = generate_nums - ready_num;
-            for (uint64_t j = 0; j < temp; j++)
+            auto& coord = detail::random_point_in_triangle(
+                vertices[indices[3 * max_pos]],
+                vertices[indices[3 * max_pos + 1]],
+                vertices[indices[3 * max_pos + 2]]);
+            if (handler_point)
             {
-                auto& coord = random_point_in_triangle(
-                    vertices[indices[0]],
-                    vertices[indices[1]],
-                    vertices[indices[2]]);
-                if (handler_point)
-                {
-                    handler_point(coord);
-                }
+                handler_point(coord);
             }
         }
     }
+}
+
 }
 

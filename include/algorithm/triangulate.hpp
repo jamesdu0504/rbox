@@ -25,12 +25,12 @@ template <> struct nth<1, rbox::coord2d> {
 
 
 template <> struct nth<0, rbox::coord2i> {
-    inline static double get(const rbox::coord2i &t) {
+    inline static int get(const rbox::coord2i &t) {
         return t.x;
     };
 };
 template <> struct nth<1, rbox::coord2i> {
-    inline static double get(const rbox::coord2i &t) {
+    inline static int get(const rbox::coord2i &t) {
         return t.y;
     };
 };
@@ -48,13 +48,13 @@ template <> struct nth<1, rbox::point<double>> {
 };
 
 template <> struct nth<0, rbox::point<int>> {
-    inline static double get(const rbox::point<double> &t) {
+    inline static int get(const rbox::point<int> &t) {
         return t.x;
     };
 };
 
 template <> struct nth<1, rbox::point<int>> {
-    inline static double get(const rbox::point<double> &t) {
+    inline static int get(const rbox::point<int> &t) {
         return t.y;
     };
 };
